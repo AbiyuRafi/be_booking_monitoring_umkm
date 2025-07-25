@@ -1,0 +1,20 @@
+-- FIRST RUNNING THIS
+CREATE OR REPLACE FUNCTION update_order_status()
+RETURNS TRIGGER AS $$
+begin
+	
+  UPDATE orders
+  SET status = NEW.status::enum_orders_status
+  WHERE id::varchar = NEW.orders_id::varchar;
+ 
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- THE RUNNING THIS
+CREATE TRIGGER after_invoice_update
+AFTER UPDATE OF status ON invoices
+FOR EACH ROW
+WHEN (OLD.status IS DISTINCT FROM NEW.status)
+EXECUTE FUNCTION update_order_status();
